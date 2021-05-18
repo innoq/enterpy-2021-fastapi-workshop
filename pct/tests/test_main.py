@@ -73,18 +73,19 @@ def test_download_keys(testdata):
     assert r.status_code == 200
     keys = r.json()
     test_keys, _ = testdata
-    assert keys == test_keys
+    assert keys == [{'id': key['id'], 'timestamp': key['timestamp']} for key in test_keys]
 
 
 @pytest.mark.queryparams
 def test_download_keys_limit(testdata):
-    keys, _ = testdata
+    test_keys, _ = testdata
     r = client.get(f'{KEYS_PREFIX}?limit=12')
     assert r.status_code == 200
-    downloaded_keys = r.json()
-    assert len(downloaded_keys) == 12
-    for key in downloaded_keys:
-        assert key in keys
+    keys = r.json()
+    assert len(keys) == 12
+    test_keys = [{'id': key['id'], 'timestamp': key['timestamp']} for key in test_keys]
+    for key in keys:
+        assert key in test_keys
 
 @pytest.mark.queryparams
 def test_download_keys_invalid_limit():
@@ -94,14 +95,14 @@ def test_download_keys_invalid_limit():
 
 @pytest.mark.pathparams
 def test_download_keys_country(testdata):
-    keys, _ = testdata
+    test_keys, _ = testdata
     COUNTRY = 'DE'
     r = client.get(f'{KEYS_PREFIX}/{COUNTRY}')
     assert r.status_code == 200
-    downloaded_keys = r.json()
-    for key in downloaded_keys:
-        assert key in keys
-        assert key['origin'] == COUNTRY
+    keys = r.json()
+    test_keys = [{'id': key['id'], 'timestamp': key['timestamp']} for key in test_keys]
+    for key in keys:
+        assert key in test_keys
 
 
 @pytest.mark.pathparams
@@ -125,7 +126,7 @@ def test_upload_key():
     assert r.status_code == 200
     keys = r.json()
     for key in keys:
-        assert key in [key1, key2]
+        assert key in [{'id': key['id'], 'timestamp': key['timestamp']} for key in [key1, key2]]
 
 
 @pytest.mark.bodyparams
@@ -218,3 +219,17 @@ def test_upload_bundle_with_invalid_key():
     keys = r.json()
     assert len(keys) == 0
 
+
+@pytest.mark.modelout
+def test_upload_bundle():
+    tans = create_test_tans(1)
+    inject_test_tans(tans)
+    test_keys = [create_key() for _ in range(5)]
+    r = client.post(f'{KEYS_PREFIX}/bundle', json=test_keys, headers={'X-Tan': tans.pop()}, allow_redirects=True)
+    assert r.status_code == 201
+    r = client.get(KEYS_PREFIX)
+    assert r.status_code == 200
+    keys = r.json()
+    test_keys_stripped = [{'id': key['id'], 'timestamp': key['timestamp']} for key in keys ]
+    for key in keys:
+        assert key in test_keys_stripped

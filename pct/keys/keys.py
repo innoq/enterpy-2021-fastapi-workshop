@@ -22,6 +22,7 @@ class CountryEnum(str, enum.Enum):
     NL = 'NL'
     GB = 'GB'
 
+
 class Key(BaseModel):
     id: constr(regex=ID_VALIDATION_REGEX)
     # origin: constr(regex=COUNTRY_VALIDATION_REGEX)
@@ -30,14 +31,21 @@ class Key(BaseModel):
     timestamp: float
 
 
-@router.get('/')
+class KeyOut(BaseModel):
+    id: constr(regex=ID_VALIDATION_REGEX)
+    timestamp: float
+
+
+# @router.get('/', response_model=List[Key], response_model_exclude={'origin'})
+@router.get('/', response_model=List[KeyOut])
 async def download_all_keys(limit: int = 0):
     if 0 < limit < len(all_keys):
         return all_keys[:limit]
     return all_keys
 
 
-@router.get('/{country}')
+# @router.get('/{country}', response_model=List[Key], response_model_exclude={'origin'})
+@router.get('/{country}', response_model=List[KeyOut])
 async def download_country_keys(country: str = Path(..., regex=COUNTRY_VALIDATION_REGEX)):
     keys = []
     for key in all_keys:
