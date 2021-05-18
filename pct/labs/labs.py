@@ -33,7 +33,7 @@ def extract_roles(decode_token = fastapi.Depends(decode_token)):
 
 
 @router.get('/tan', status_code=200)
-async def download_tans(roles : List[str] = fastapi.Depends(extract_roles)):
+async def download_tans(roles: List[str] = fastapi.Depends(extract_roles)):
     check_role(roles, 'user', 'admin')
     return TanList(tans=keys.tans)
 
