@@ -23,6 +23,6 @@ async def download_country_keys(country: str = Path(..., regex='^(DE|NL|GB)$')):
 
 
 @router.post('/', status_code=201)
-async def upload_key(id: str = Body(..., regex='^[0-9A-Fa-f]{32}$'), origin: str = Body(..., regex='^(DE|NL|GB)$'), timestamp: float = Body()):
+async def upload_key(id: str = Body(..., regex='^[0-9A-Fa-f]{32}$'), origin: str = Body(..., regex='^(DE|NL|GB)$'), timestamp: float = Body(...)):
     key = { 'id': id, 'origin': origin, 'timestamp': timestamp}
     all_keys.append(key)
