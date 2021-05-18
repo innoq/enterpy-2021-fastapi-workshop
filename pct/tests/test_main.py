@@ -8,5 +8,5 @@ client = TestClient(app)
 
 @pytest.mark.helloenterpy
 def test_hello_enterpy():
-    r = client.get('/')
+    r = client.get('/welcome')
     assert r.json() == "Hello enterPY!"
