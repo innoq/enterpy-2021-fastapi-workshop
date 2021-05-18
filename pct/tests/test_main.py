@@ -1,3 +1,5 @@
+import base64
+import json
 import random
 import secrets
 import time
@@ -9,6 +11,7 @@ from fastapi.testclient import TestClient
 from pct.main import app
 
 KEYS_PREFIX = '/keys'
+LABS_PREFIX = '/labs'
 
 client = TestClient(app)
 
@@ -222,6 +225,7 @@ def test_upload_bundle_with_invalid_key():
 
 @pytest.mark.modelout
 def test_upload_bundle():
+    delete_injected_test_tans()
     tans = create_test_tans(1)
     inject_test_tans(tans)
     test_keys = [create_key() for _ in range(5)]
@@ -233,3 +237,53 @@ def test_upload_bundle():
     test_keys_stripped = [{'id': key['id'], 'timestamp': key['timestamp']} for key in keys ]
     for key in keys:
         assert key in test_keys_stripped
+
+
+def create_token(roles: typing.List[str]) -> str:
+    j = json.dumps(roles)
+    return base64.b64encode(j.encode('UTF-8')).decode('UTF-8')
+
+
+@pytest.mark.dependencies
+def test_upload_tans_admin():
+    delete_injected_test_tans()
+    test_tans = create_test_tans(10)
+    token = create_token(['admin'])
+    r = client.post(f'{LABS_PREFIX}/tan', json={'tans': test_tans}, cookies={'token': token},  allow_redirects=True)
+    assert r.status_code == 201
+    r = client.get(f'{LABS_PREFIX}/tan', cookies={'token': token})
+    assert r.status_code == 200
+    tans = r.json()
+    assert test_tans == tans['tans']
+
+
+@pytest.mark.dependencies
+def test_upload_tans_without_cookie():
+    delete_injected_test_tans()
+    test_tans = create_test_tans(10)
+    r = client.post(f'{LABS_PREFIX}/tan', json={'tans': test_tans}, allow_redirects=True)
+    assert r.status_code == 422
+
+
+@pytest.mark.dependencies
+def test_upload_tans_user():
+    delete_injected_test_tans()
+    test_tans = create_test_tans(10)
+    token = create_token(['user'])
+    r = client.post(f'{LABS_PREFIX}/tan', json={'tans': test_tans}, cookies={'token': token},  allow_redirects=True)
+    assert r.status_code == 401
+    r = client.get(f'{LABS_PREFIX}/tan', cookies={'token': token})
+    assert r.status_code == 200
+    tans = r.json()
+    assert len(tans['tans']) == 0
+
+
+@pytest.mark.dependencies
+def test_upload_tans_guest():
+    delete_injected_test_tans()
+    test_tans = create_test_tans(10)
+    token = create_token(['guest'])
+    r = client.post(f'{LABS_PREFIX}/tan', json={'tans': test_tans}, cookies={'token': token},  allow_redirects=True)
+    assert r.status_code == 401
+    r = client.get(f'{LABS_PREFIX}/tan', cookies={'token': token})
+    assert r.status_code == 401

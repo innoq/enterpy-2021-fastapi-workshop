@@ -2,9 +2,11 @@ import fastapi
 import uvicorn
 
 from pct.keys import keys
+from pct.labs import labs
 
 app = fastapi.FastAPI()
 app.include_router(keys.router)
+app.include_router(labs.router, prefix='/labs')
 
 @app.get('/welcome')
 async def index():
