@@ -23,6 +23,7 @@ def check_role(given_roles: List[str], *allowed_roles):
         raise fastapi.HTTPException(fastapi.status.HTTP_401_UNAUTHORIZED,
                                     detail='you are missing the required permission')
 
+
 # TODO: Eine Dependency implementieren
 #  Implementiere 'extract_roles' die aus des dem Cookie 'token' die Rollen des Users extrahiert und als
 #  Liste von Strings zurück gibt. Binde 'extract_roles' als Dependency ein.
@@ -31,6 +32,7 @@ def check_role(given_roles: List[str], *allowed_roles):
 async def download_tans(roles: List[str]):
     check_role(roles, 'user', 'admin')
     return TanList(tans=keys.tans)
+
 
 # TODO: Eine Dependency implementieren
 #  Binde auch hier 'extract_roles' als Dependecy ein
