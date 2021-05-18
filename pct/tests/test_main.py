@@ -78,7 +78,7 @@ def test_download_keys_limit(testdata):
         assert key in testdata
 
 @pytest.mark.queryparams
-def test_download_keys_invalid_limit(testdata):
+def test_download_keys_invalid_limit():
     r = client.get(f'{KEYS_PREFIX}?limit=foo')
     assert r.status_code == 422
 
@@ -95,7 +95,7 @@ def test_download_keys_country(testdata):
 
 
 @pytest.mark.pathparams
-def test_download_keys_invalid_country(testdata):
+def test_download_keys_invalid_country():
     COUNTRY = 'FOO'
     r = client.get(f'{KEYS_PREFIX}/{COUNTRY}')
     assert r.status_code == 422
@@ -104,7 +104,7 @@ def test_download_keys_invalid_country(testdata):
 @pytest.mark.bodyparams
 def test_upload_key():
     key1 = create_key(id_length=16)
-    key2= create_key(id_length=16)
+    key2 = create_key(id_length=16)
     r = client.post(KEYS_PREFIX, json=key1, allow_redirects=True)
     assert r.status_code == 201
     r = client.post(KEYS_PREFIX, json=key2, allow_redirects=True)
@@ -114,3 +114,17 @@ def test_upload_key():
     keys = r.json()
     for key in keys:
         key in [key1, key2]
+
+
+@pytest.mark.bodyparams
+def test_upload_inalvid_key():
+    key1 = create_key(id_length=15)
+    key2 = create_key(16, origins=['DEE'])
+    key3 = create_key(16, origins=['DE'])
+    key3.pop('timestamp')
+    r = client.post(KEYS_PREFIX, json=key1, allow_redirects=True)
+    assert r.status_code == 422
+    r = client.post(KEYS_PREFIX, json=key2, allow_redirects=True)
+    assert r.status_code == 422
+    r = client.post(KEYS_PREFIX, json=key3, allow_redirects=True)
+    assert r.status_code == 422
