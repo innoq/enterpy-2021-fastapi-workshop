@@ -6,7 +6,7 @@
 #  Werte dabei den Query-Parameter 'limit' aus. Ist er gesetzt liefere nur n-Datensätze aus 'all_keys'
 #  zurück, wobei n = 'limit' (Wert des Query-Parameters).
 
-# TODO: GET-Request mit Pah-Parametern beantworten
+# TODO: GET-Request mit Path-Parametern beantworten
 #  Liefere auf dem Pfad '/{country}' des APIRouters nur Datensätze aus der Liste 'all_keys' zurück,
 #  bei denen 'origin' == {country} (Wert des Path-Parameters)
 
