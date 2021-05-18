@@ -117,7 +117,7 @@ def test_upload_key():
 
 
 @pytest.mark.bodyparams
-def test_upload_inalvid_key():
+def test_upload_invalid_key():
     key1 = create_key(id_length=15)
     key2 = create_key(16, origins=['DEE'])
     key3 = create_key(16, origins=['DE'])
@@ -128,3 +128,4 @@ def test_upload_inalvid_key():
     assert r.status_code == 422
     r = client.post(KEYS_PREFIX, json=key3, allow_redirects=True)
     assert r.status_code == 422
+
