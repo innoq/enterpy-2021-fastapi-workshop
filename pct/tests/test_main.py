@@ -10,4 +10,4 @@ client = TestClient(app)
 def test_hello_enterpy():
     r = client.get('/welcome')
     assert r.status_code == 200
-    assert r.json() == "Hello enterPY!"
+    assert r.json() == 'Hello enterPY!'
