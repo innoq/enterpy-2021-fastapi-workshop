@@ -176,3 +176,15 @@ def test_upload_with_invalid_tan(testdata: typing.List):
     for key in keys:
         r = client.post(KEYS_PREFIX, json=key, headers={'X-Tan': 'foo'}, allow_redirects=True)
         assert r.status_code == 422
+
+
+@pytest.mark.headerparams
+def test_upload_with_reused_tan(testdata: typing.List):
+    keys1, tans1 = testdata
+    keys2, tans2 = keys1.copy(), tans1.copy()
+    for key in keys1:
+        r = client.post(KEYS_PREFIX, json=key, headers={'X-Tan': tans1.pop()}, allow_redirects=True)
+        assert r.status_code == 201
+    for key in keys2:
+        r = client.post(KEYS_PREFIX, json=key, headers={'X-Tan': tans2.pop()}, allow_redirects=True)
+        assert r.status_code == 401
