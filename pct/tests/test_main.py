@@ -287,3 +287,13 @@ def test_upload_tans_guest():
     assert r.status_code == 401
     r = client.get(f'{LABS_PREFIX}/tan', cookies={'token': token})
     assert r.status_code == 401
+
+
+@pytest.mark.middleware
+def test_middleware():
+    r = client.get('/welcome')
+    assert r.headers['Server-Timing'] != None
+    r = client.get(f'{LABS_PREFIX}/tan')
+    assert r.headers['Server-Timing'] != None
+    r = client.get(KEYS_PREFIX)
+    assert r.headers['Server-Timing'] != None
