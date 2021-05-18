@@ -96,7 +96,7 @@ def test_download_keys_country(testdata):
 
 @pytest.mark.pathparams
 def test_download_keys_invalid_country():
-    COUNTRY = 'FOO'
+    COUNTRY = 'DEE'
     r = client.get(f'{KEYS_PREFIX}/{COUNTRY}')
     assert r.status_code == 422
 
