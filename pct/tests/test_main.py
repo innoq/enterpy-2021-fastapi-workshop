@@ -113,7 +113,7 @@ def test_upload_key():
     assert r.status_code == 200
     keys = r.json()
     for key in keys:
-        key in [key1, key2]
+        assert key in [key1, key2]
 
 
 @pytest.mark.bodyparams
