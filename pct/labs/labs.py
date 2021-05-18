@@ -28,8 +28,8 @@ def decode_token(token = fastapi.Cookie(...)):
     return base64.b64decode(token).decode('UTF-8')
 
 
-def extract_roles(decode_token = fastapi.Depends(decode_token)):
-    return json.loads(decode_token)
+def extract_roles(decoded_token = fastapi.Depends(decode_token)):
+    return json.loads(decoded_token)
 
 
 @router.get('/tan', status_code=200)
