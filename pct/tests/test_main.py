@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 
 from pct.main import app
 
+KEYS_PREFIX = '/keys'
+
 client = TestClient(app)
 
 
@@ -20,7 +22,7 @@ def create_upload_router():
         from pct.keys import keys
         keys.all_keys.append(await req.json())
     @upload_router.delete('/')
-    async def delete_test_data(req: Request):
+    async def delete_test_data():
         from pct.keys import keys
         keys.all_keys.clear()
     return upload_router
@@ -47,9 +49,9 @@ def testdata():
     app.include_router(create_upload_router(), prefix=(TEST_UPLOAD_PREFIX))
     keys = create_test_keys(25)
     for key in keys:
-        client.post(f'{TEST_UPLOAD_PREFIX}/', json=key)
+        client.post(TEST_UPLOAD_PREFIX, json=key, allow_redirects=True)
     yield keys
-    client.delete(f'{TEST_UPLOAD_PREFIX}/')
+    client.delete(TEST_UPLOAD_PREFIX, allow_redirects=True)
 
 
 @pytest.mark.helloenterpy
@@ -60,7 +62,7 @@ def test_hello_enterpy():
 
 @pytest.mark.downloadkeys
 def test_download_keys(testdata):
-    r = client.get('/keys')
+    r = client.get(KEYS_PREFIX)
     assert r.status_code == 200
     keys = r.json()
     assert keys == testdata
@@ -68,20 +70,32 @@ def test_download_keys(testdata):
 
 @pytest.mark.queryparams
 def test_download_keys_limit(testdata):
-    r = client.get('/keys?limit=12')
+    r = client.get(f'{KEYS_PREFIX}?limit=12')
     assert r.status_code == 200
     keys = r.json()
     assert len(keys) == 12
     for key in keys:
         assert key in testdata
 
+@pytest.mark.queryparams
+def test_download_keys_invalid_limit():
+    r = client.get(f'{KEYS_PREFIX}?limit=foo')
+    assert r.status_code == 422
+
 
 @pytest.mark.pathparams
 def test_download_keys_country(testdata):
     COUNTRY = 'DE'
-    r = client.get(f'/keys/{COUNTRY}')
+    r = client.get(f'{KEYS_PREFIX}/{COUNTRY}')
     assert r.status_code == 200
     keys = r.json()
     for key in keys:
         assert key in testdata
         assert key['origin'] == COUNTRY
+
+
+@pytest.mark.pathparams
+def test_download_keys_invalid_country():
+    COUNTRY = 'DEE'
+    r = client.get(f'{KEYS_PREFIX}/{COUNTRY}')
+    assert r.status_code == 422
