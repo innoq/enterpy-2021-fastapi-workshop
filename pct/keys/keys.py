@@ -11,5 +11,5 @@
 #  bei denen 'origin' == {country} (Wert des Path-Parameters)
 
 # Wird vom Test automatisch befüllt. Nicht ändern!
-# Einträge sind Dicts in der Form {id: '...', origin: '...', timestamp: '...'}
+# Einträge sind Dicts in der Form {id: '<hexstring:32>', origin: '<DE|NL|GB>', timestamp: float}
 all_keys = []
