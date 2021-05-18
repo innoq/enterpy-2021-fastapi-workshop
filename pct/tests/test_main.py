@@ -188,3 +188,33 @@ def test_upload_with_reused_tan(testdata: typing.List):
     for key in keys2:
         r = client.post(KEYS_PREFIX, json=key, headers={'X-Tan': tans2.pop()}, allow_redirects=True)
         assert r.status_code == 401
+
+@pytest.mark.modelmapping
+def test_upload_bundle():
+    tans = create_test_tans(1)
+    inject_test_tans(tans)
+    test_keys = [create_key() for _ in range(5)]
+    r = client.post(f'{KEYS_PREFIX}/bundle', json=test_keys, headers={'X-Tan': tans.pop()}, allow_redirects=True)
+    assert r.status_code == 201
+    r = client.get(KEYS_PREFIX)
+    assert r.status_code == 200
+    keys = r.json()
+    for key in keys:
+        assert key in test_keys
+
+
+@pytest.mark.modelmapping
+def test_upload_bundle_with_invalid_key():
+    delete_injected_test_keys()
+    tans = create_test_tans(1)
+    inject_test_tans(tans)
+    test_keys = [create_key() for _ in range(5)]
+    test_keys.append(create_key(origins=['NNL']))
+    test_keys.append(create_key(origins=['GBB']))
+    r = client.post(f'{KEYS_PREFIX}/bundle', json=test_keys, headers={'X-Tan': tans.pop()}, allow_redirects=True)
+    assert r.status_code == 422
+    r = client.get(KEYS_PREFIX)
+    assert r.status_code == 200
+    keys = r.json()
+    assert len(keys) == 0
+
