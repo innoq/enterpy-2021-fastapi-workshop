@@ -62,7 +62,7 @@ def test_hello_enterpy():
 
 @pytest.mark.downloadkeys
 def test_download_keys(testdata):
-    r = client.get('/keys')
+    r = client.get(KEYS_PREFIX)
     assert r.status_code == 200
     keys = r.json()
     assert keys == testdata
